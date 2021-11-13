@@ -1,8 +1,12 @@
+import os
+import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import csv
 import yfinance as yahoo_finance
 yahoo_finance.pdr_override()
+import numpy as np
+
 
 
 def createZigZagPoints(ticker, dfSeries, minSegSize=0.1):
@@ -23,6 +27,13 @@ def createZigZagPoints(ticker, dfSeries, minSegSize=0.1):
     pd.Series
             a data series of retracement points that form zigzag lines
             TODO: the data series returned has some indexed empty values 
+    
+    Algorithm:
+    For each index representing a data point, it looks for changes in next value that are trending
+    If the next value is trending, that value becomes the index
+    If not, we check the retracement from the trend. If the retracement is more than some minRetrace,
+    we add our old index's values to our zigzag dataframe. The datapoint with the given retracement becomes the new
+    index.
     """
 
     minRetrace = minSegSize
@@ -39,14 +50,14 @@ def createZigZagPoints(ticker, dfSeries, minSegSize=0.1):
             if(retracePrc >= minRetrace):
                 dfZigZag.loc[curPos, 'Value'] = curVal
                 dfZigZag.loc[curPos, 'Dir'] = curDir
-                appendToCSV(ticker+'ZigzagPoints.csv', [curVal, curDir])
+                appendToCSV('{}ZigZag.csv'.format(ticker), [curVal, curDir])
                 curVal = dfSeries[ln]
                 curPos = ln
                 curDir = -1*curDir
     return dfZigZag
 
 
-def resistanceFinder(ticker, dfRes):
+def resistanceFinder(ticker, dfRes, args):
     """Gets Support and Resistance points that last forever
 
     Parameters
@@ -59,6 +70,13 @@ def resistanceFinder(ticker, dfRes):
     Returns
     -------
     endx. It helps maintain temporal continuity between this method and drawTicker
+
+    Algorithm
+    ---------
+    Using input dataframe of zigzag points, we iterate the dataframe, marking each index for removal
+    in the future by addig them to a removed_index list. Then for that index, we run an inner for 
+    loop across the remaining datapoints. If the datapoints have a difference that is within a small range,
+    then they are support/resistance.
     """
 
     try:
@@ -100,10 +118,9 @@ def resistanceFinder(ticker, dfRes):
                     plt.hlines(y=sum/len(values), xmin=startx,
                                xmax=endx, linewidth=1, color='r')
                     # for real time/ historical purpose
-                    appendToCSV(
-                        ticker+"SupportResistanceDirection.csv", [sum/len(values), dir])
+                    appendToCSV("{}SupportResistance.csv".format(ticker), [sum/len(values), dir])
                     ret = endx
-        return ret
+        # return ret
     except Exception as e:
         print(e)
 
@@ -125,7 +142,11 @@ def appendToCSV(filename, data_point):
 
     if isinstance(data_point, pd.DataFrame):
         data_point.to_csv(filename, mode='a')
-    file = open(filename, 'a')
+    
+    modpath = os.path.dirname(os.path.abspath(sys.argv[0]))
+    datapath = os.path.join(modpath, '../datas/{}'.format(filename))
+
+    file = open(datapath, 'a')
     writer = csv.writer(file)
     writer.writerow(data_point)
     file.close

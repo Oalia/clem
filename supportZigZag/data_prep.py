@@ -44,9 +44,9 @@ def arguement_parser(tickers, period, interval, dif, time, number, min):
     return args
 
 
-def getQuotes():
+def get_quotes_API():
     """
-Gets quotes from API call to yfinance
+    Gets quotes from API call to yfinance
 
     Parameters
     ----------
@@ -79,7 +79,7 @@ Gets quotes from API call to yfinance
     return tickers, ticker_df
 
 
-def get_file_quotes(ticker_file_csv):
+def get_quotes_file(ticker_file_csv):
     """
     Gets quotes from file
 
@@ -94,46 +94,10 @@ def get_file_quotes(ticker_file_csv):
             A dataframe with date, ohlc and volume
     """
 
-    col_names = ['date', 'open', 'high', 'low', 'close', 'volume']
+    col_names = ['date', 'open', 'high', 'low', 'adjust','close', 'volume']
     df = pd.read_csv(ticker_file_csv, names=col_names)
     # # clean time
     # posix_time = pd.to_datetime(df[time], unit='s')
     # df.insert(0, "Date", posix_time)
     # df.drop("time", axis=1, inplace=True)
     return df
-
-
-
-
-
-
-# try:
-args = arguement_parser(tickers='SPY500', period='5d', interval='1m',
-                        dif='0.05', time='1200', number='3', min='150')
-fig, ax = plt.subplots()
-raw_df = get_file_quotes("data_file.csv")
-zigzags = createZigZagPoints(
-    ticker="demo_ticker", dfSeries=raw_df['close']).dropna()
-support_resistance = resistanceFinder(ticker="AMC", dfRes=zigzags)
-
-candlestick2_ohlc(ax, raw_df['open'], raw_df['high'], raw_df['low'],
-                    raw_df['close'], width=0.6, colorup='g', colordown='r')
-plt.plot(zigzags['Value'])
-
-# actual work after resistanceFinder is done
-ret = resistanceFinder('demo_ticker', zigzags)
-
-# x_max = ret
-# if (x_max > args.min):
-plt.title('demo_ticker')
-plt.show()
-
-plt.clf()
-plt.cla()
-plt.close()
-print("maybe")
-
-candle_df = get_candle_sticks(df=raw_df)
-candle_df.to_csv("zandles.csv", sep='\t')
-# except Exception as e:
-#     print(e)

@@ -1,17 +1,13 @@
 import pandas as pd
-# pd.core.common.is_list_like = pd.api.types.is_list_like
 import pandas_datareader.data as web
 import numpy as np
 import matplotlib.pyplot as plt
-# import seaborn as sns
-# import datetime
 import time
 import csv
 import yfinance as yahoo_finance
 yahoo_finance.pdr_override()
 from mpl_finance import candlestick2_ohlc
 from argparse import ArgumentParser
-import threading as thread
 
 parser = ArgumentParser(description='Algorithmic Support and Resistance')
 parser.add_argument('-t', '--tickers', default='SPY500', type=str, required=False, help='Used to look up a specific tickers. Commma seperated. Example: MSFT,AAPL,AMZN default: List of S&P 500 companies')

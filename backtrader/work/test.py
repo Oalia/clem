@@ -10,6 +10,7 @@ import yfinance as yf
 from strategies import test_strategy as ts
 import csv
 
+
 # Import the backtrader platform
 import backtrader as bt
 
@@ -18,10 +19,11 @@ if __name__ == '__main__':
     cerebro = bt.Cerebro()
 
     # Add a strategy
-    strats = cerebro.optstrategy(
-        ts.TestStrategy,
-        maperiod=range(10, 31))
-
+    # strats = cerebro.optstrategy(
+    #     ts.TestStrategy,
+    #     maperiod=range(10, 31))
+    cerebro.addstrategy(ts.TestStrategy)
+    
     # Datas are in a subfolder of the samples. Need to find where the script is
     # because it could have been called from anywhere
     modpath = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -46,3 +48,4 @@ if __name__ == '__main__':
 
     # Run over everything
     cerebro.run(maxcpus=1)
+    cerebro.plot()

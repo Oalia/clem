@@ -95,6 +95,8 @@ def get_quotes_file(ticker_file_csv):
     """
 
     col_names = ['date', 'open', 'high', 'low', 'adjust','close', 'volume']
+    # ticker_df = web.get_data_yahoo(tickers, period = args.period, interval = args.interval)
+
     df = pd.read_csv(ticker_file_csv, names=col_names)
     # # clean time
     # posix_time = pd.to_datetime(df[time], unit='s')

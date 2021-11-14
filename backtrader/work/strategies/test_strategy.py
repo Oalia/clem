@@ -5,10 +5,19 @@ import backtrader.feeds as btfeeds
 
 # Create a Stratey
 class TestStrategy(bt.Strategy):
+    """
+    market trend: bullish
+    not suitable to a downward trending market
+    """
     params = (
         ('maperiod', 15),
         ('printlog', False),
+        ('stop_loss', 0.001),
+        ('trail', False),
     )
+
+    # keeps track of buy order for stop loss
+    buy_order = None
 
     def log(self, txt, dt=None, doprint=False):
         ''' Logging function fot this strategy'''
@@ -82,7 +91,7 @@ class TestStrategy(bt.Strategy):
 
         # Check if we are in the market
         if not self.position:
-            if self.vortex.vi_plus[0] < 0.9:
+            if self.vortex.vi_plus[0] < 0.8 or self.vortex.vi_minus[0] > 1.5:
                 # Not yet ... we MIGHT BUY if ...
                 if self.dataclose[0] < self.sma[0] and self.dataclose[0] < self.zig.last_high[0]:
 
@@ -93,13 +102,20 @@ class TestStrategy(bt.Strategy):
                     self.order = self.buy()
 
         else:
-            if self.dataclose[0] > self.sma[0]:
-                if self.vortex.vi_minus[0] < .8:
+            if not self.p.trail:
+                stop_price = self.data.close[0] * (1.0 - self.p.stop_loss)
+                self.sell(exectype=bt.Order.Stop, price=stop_price,
+                parent=self.order)
+            
+            if self.vortex.vi_plus[0] > 1.3 and self.vortex.vi_minus[0] < .75:
+                if self.dataclose[0] > self.sma[0]:
                     # SELL, SELL, SELL!!! (with all possible default parameters)
                     self.log('SELL CREATE, %.2f' % self.dataclose[0])
 
                     # Keep track of the created order to avoid a 2nd order
                     self.order = self.sell()
+
+
 
     def stop(self):
         self.log('(MA Period %2d) Ending Value %.2f' %

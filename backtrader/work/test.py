@@ -30,15 +30,15 @@ if __name__ == '__main__':
     datapath = os.path.join(modpath, '../../datas/data_file.csv')
 
     # Create a Data Feed
-    data = bt.feeds.PandasData(dataname=yf.download('TSLA', '2018-01-01', '2019-01-01'))
-    dataname=yf.download('TSLA', '2018-01-01', '2019-01-01')
-    dataname.to_csv("feeder.csv")
+    data = bt.feeds.PandasData(dataname=yf.download('VEON', '2016-01-01', '2021-10-01'))
+    # dataname=yf.download('TSLA', '2018-01-01', '2019-01-01')
+    # dataname.to_csv("feeder.csv")
 
     # Add the Data Feed to Cerebro
     cerebro.adddata(data)
 
     # Set our desired cash start
-    cerebro.broker.setcash(1000.0)
+    cerebro.broker.setcash(10000.0)
 
     # Add a FixedSize sizer according to the stake
     cerebro.addsizer(bt.sizers.FixedSize, stake=10)

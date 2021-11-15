@@ -10,10 +10,14 @@ class TestStrategy(bt.Strategy):
     not suitable to a downward trending market
     """
     params = (
+
         ('maperiod', 15),
+        ('rsperiod', 9),
         ('printlog', False),
-        ('stop_loss', 0.001),
+        ('stoploss', 0.01),
+        ('profit_mult', 0.2),
         ('trail', False),
+        
     )
 
     # keeps track of buy order for stop loss
@@ -36,12 +40,24 @@ class TestStrategy(bt.Strategy):
         # 1. Vortex indicator
 
         self.vortex = Vortex()
+        # self.vi_plus = Vortex().lines.vi_plus
         self.zig = ZigZag(self.data)
 
         # Add a MovingAverageSimple indicator
         self.sma = bt.indicators.SimpleMovingAverage(
             self.datas[0], period=self.params.maperiod)
         
+        self.vortex_sma = bt.indicators.SimpleMovingAverage(Vortex().lines.vi_plus, period=self.params.rsperiod)
+
+        # try:
+        #     self.vortex_sma = bt.indicators.SimpleMovingAverage(self.vi_plus[0], period=self.params.maperiod)
+        # except Exception as e:
+        #     print(e)
+             
+        
+        # 2 RSI
+        self.rsi = bt.indicators.RSI(
+            self.datas[0], period=self.params.rsperiod)
 
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
@@ -52,6 +68,25 @@ class TestStrategy(bt.Strategy):
         # Attention: broker could reject order if not enough cash
         if order.status in [order.Completed]:
             if order.isbuy():
+                # stop_loss = order.executed.price*(1.0 - (self.p.stoploss))
+                # take_profit = order.executed.price*(1.0 + self.p.profit_mult*(self.p.stoploss))
+
+                # sl_ord = self.sell(exectype=bt.Order.Stop,
+                #                     price=stop_loss)
+                # sl_ord.addinfo(name="Stop")
+
+                # tkp_ord = self.sell(exectype=bt.Order.Limit,
+                #                     price=take_profit)
+                # tkp_ord.addinfo(name="Prof")
+                # self.order_dict[sl_ord.ref] = tkp_ord
+                # self.order_dict[tkp_ord.ref] = sl_ord
+
+                # if self.p.prorder:
+                #     print("SignalPrice: %.2f Buy: %.2f, Stop: %.2f, Prof: %.2f"
+                #             % (self.last_sig_price,
+                #                 order.executed.price,
+                #                 stop_loss,
+                #                 take_profit))
                 self.log(
                     'BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
                     (order.executed.price,
@@ -60,6 +95,7 @@ class TestStrategy(bt.Strategy):
 
                 self.buyprice = order.executed.price
                 self.buycomm = order.executed.comm
+
             else:  # Sell
                 self.log('SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
                          (order.executed.price,
@@ -71,8 +107,6 @@ class TestStrategy(bt.Strategy):
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
             self.log('Order Canceled/Margin/Rejected')
 
-        # Write down: no pending order
-        self.order = None
 
     def notify_trade(self, trade):
         if not trade.isclosed:
@@ -86,35 +120,34 @@ class TestStrategy(bt.Strategy):
         self.log('Close, %.2f' % self.dataclose[0])
 
         # Check if an order is pending ... if yes, we cannot send a 2nd one
-        if self.order:
-            return
+        # if self.order:
+        #     return
 
         # Check if we are in the market
         if not self.position:
-            if self.vortex.vi_plus[0] < 0.8 or self.vortex.vi_minus[0] > 1.5:
+            # print(self.vi_plus[0])
+            if self.dataclose[0] < self.sma[0]:
+                if self.vortex.vi_plus[0] <= 0.75: # or self.vortex.vi_minus[0] > 1.09:
                 # Not yet ... we MIGHT BUY if ...
-                if self.dataclose[0] < self.sma[0] and self.dataclose[0] < self.zig.last_high[0]:
+                #if self.dataclose[0] < self.sma[0] and self.dataclose[0] < self.zig.last_high[0]:
+                    #if self.rsi[0] < 30:
+                        # BUY, BUY, BUY!!! (with all possible default parameters)
+                        self.log('BUY CREATE, %.2f' % self.dataclose[0])
 
-                    # BUY, BUY, BUY!!! (with all possible default parameters)
-                    self.log('BUY CREATE, %.2f' % self.dataclose[0])
-
-                    # Keep track of the created order to avoid a 2nd order
-                    self.order = self.buy()
+                        # Keep track of the created order to avoid a 2nd order
+                        self.order = self.buy()
 
         else:
-            if not self.p.trail:
-                stop_price = self.data.close[0] * (1.0 - self.p.stop_loss)
-                self.sell(exectype=bt.Order.Stop, price=stop_price,
-                parent=self.order)
-            
-            if self.vortex.vi_plus[0] > 1.3 and self.vortex.vi_minus[0] < .75:
-                if self.dataclose[0] > self.sma[0]:
-                    # SELL, SELL, SELL!!! (with all possible default parameters)
-                    self.log('SELL CREATE, %.2f' % self.dataclose[0])
+            if self.dataclose[0] > self.sma[0]:
+                if self.vortex.vi_plus[0] >= 1.12: # or self.vortex.vi_minus[0] < .55:
+                #if self.dataclose[0] > self.sma[0]:
+                    #if self.rsi[0] > 76:
+                        # SELL, SELL, SELL!!! (with all possible default parameters)
+                        
+                        self.log('SELL CREATE, %.2f' % self.dataclose[0])
 
-                    # Keep track of the created order to avoid a 2nd order
-                    self.order = self.sell()
-
+                        # Keep track of the created order to avoid a 2nd order
+                        self.order = self.sell()
 
 
     def stop(self):
@@ -127,7 +160,6 @@ class Vortex(bt.Indicator):
       - http://www.vortexindicator.com/VFX_VORTEX.PDF
     '''
     lines = ('vi_plus', 'vi_minus',)
-
     params = (('period', 14),)
 
     plotlines = dict(vi_plus=dict(_name='+VI', ls='--'), vi_minus=dict(_name='-VI'))

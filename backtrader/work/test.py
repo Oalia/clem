@@ -7,7 +7,7 @@ import os.path  # To manage paths
 import sys  # To find out the script name (in argv[0])
 import pandas_datareader.data as web
 import yfinance as yf
-from strategies import test_strategy as ts
+from strategies import vortex_strategy as ts
 import csv
 
 
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     datapath = os.path.join(modpath, '../../datas/data_file.csv')
 
     # Create a Data Feed
-    data = bt.feeds.PandasData(dataname=yf.download('VEON', '2016-01-01', '2021-10-01'))
+    data = bt.feeds.PandasData(dataname=yf.download('GOLD', '2017-01-01', '2020-10-01'))
     # dataname=yf.download('TSLA', '2018-01-01', '2019-01-01')
     # dataname.to_csv("feeder.csv")
 
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     cerebro.adddata(data)
 
     # Set our desired cash start
-    cerebro.broker.setcash(10000.0)
+    cerebro.broker.setcash(1000.0)
 
     # Add a FixedSize sizer according to the stake
     cerebro.addsizer(bt.sizers.FixedSize, stake=10)

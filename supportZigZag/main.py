@@ -28,7 +28,7 @@ def run(symbol, candle_pattern):
     # zigzags
     datapath = os.path.join(modpath, '../datas/{}ZigZags.csv'.format(symbol))
     zigzags = createZigZagPoints(ticker=symbol, dfSeries=raw_df['close']).dropna()
-    resistanceFinder(symbol, zigzags, args)
+    resistanceFinder(symbol, zigzags, args, ax1)
     ax1.plot(zigzags['Value'])
     ax1.title.set_text('{} chart'.format(symbol))
     candlestick2_ohlc(ax1, raw_df['open'], raw_df['high'], raw_df['low'],raw_df['close'], width=0.6, colorup='g', colordown='r')
@@ -51,4 +51,4 @@ def run(symbol, candle_pattern):
     ax_rsi.plot(raw_df.index[:-1], rsi_data)
     plt.show()
 
-run("DEMO", "CDLLONGLEGGEDDOJI_Bull")
+run("DEMO", "CDLENGULFING_Bull")

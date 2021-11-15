@@ -1,7 +1,6 @@
 import os
 import sys
 import pandas as pd
-import matplotlib.pyplot as plt
 import csv
 import yfinance as yahoo_finance
 yahoo_finance.pdr_override()
@@ -57,7 +56,7 @@ def createZigZagPoints(ticker, dfSeries, minSegSize=0.1):
     return dfZigZag
 
 
-def resistanceFinder(ticker, dfRes, args):
+def resistanceFinder(ticker, dfRes, args, plt):
     """Gets Support and Resistance points that last forever
 
     Parameters

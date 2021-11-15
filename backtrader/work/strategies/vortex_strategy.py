@@ -12,6 +12,8 @@ class TestStrategy(bt.Strategy):
     params = (
 
         ('maperiod', 15),
+        ('devfactor', 1.6),
+        ('bollperiod', 9),
         ('rsperiod', 9),
         ('printlog', False),
         ('stoploss', 0.01),
@@ -41,7 +43,12 @@ class TestStrategy(bt.Strategy):
 
         self.vortex = Vortex()
         # self.vi_plus = Vortex().lines.vi_plus
-        self.zig = ZigZag(self.data)
+        # self.zig = ZigZag(self.data)
+        self.vortex_dif = - self.vortex.vi_plus + self.vortex.vi_minus
+
+        # 3 bollinger bands
+        self.boll = bt.indicators.BollingerBands(period=self.p.bollperiod, devfactor=self.p.devfactor)
+
 
         # Add a MovingAverageSimple indicator
         self.sma = bt.indicators.SimpleMovingAverage(
@@ -126,20 +133,35 @@ class TestStrategy(bt.Strategy):
         # Check if we are in the market
         if not self.position:
             # print(self.vi_plus[0])
-            if self.dataclose[0] < self.sma[0]:
-                if self.vortex.vi_plus[0] <= 0.75: # or self.vortex.vi_minus[0] > 1.09:
-                # Not yet ... we MIGHT BUY if ...
-                #if self.dataclose[0] < self.sma[0] and self.dataclose[0] < self.zig.last_high[0]:
-                    #if self.rsi[0] < 30:
-                        # BUY, BUY, BUY!!! (with all possible default parameters)
-                        self.log('BUY CREATE, %.2f' % self.dataclose[0])
+            # print(self.vortex_dif[0])
+            # if round(self.rsi[0]) == 27 and self.vortex.vi_minus[0]:
+            if round(self.vortex_dif[0], 3) < 0.001 : 
+                if self.data.close < self.boll.lines.bot:
 
-                        # Keep track of the created order to avoid a 2nd order
-                        self.order = self.buy()
+                # if round(self.vortex_dif[4], 2) > 0.1 :
+                #if self.vortex.vi_minus[0] - self.vortex.vi_plus[0] < 0.009 : # and self.vortex.l.vi_minus[10] > 1:
+                # print(self.vortex.vi_minus[0], self.vortex.vi_plus[0])
+                #if self.vortex_sma[0] < self.vortex.l.vi_minus[0]: #self.vortex.vi_plus[0] or self.vortex_sma[3] < self.vortex.vi_plus[0]:
+                    # if self.dataclose[0] < self.sma[0]:
+                        # if self.vortex.vi_plus[0] <= 0.75: # or self.vortex.vi_minus[0] > 1.09:
+                        # Not yet ... we MIGHT BUY if ...
+                        #if self.dataclose[0] < self.sma[0] and self.dataclose[0] < self.zig.last_high[0]:
+                            #if self.rsi[0] < 30:
+                                # BUY, BUY, BUY!!! (with all possible default parameters)
+                                self.log('BUY CREATE, %.2f' % self.dataclose[0])
+
+                                # Keep track of the created order to avoid a 2nd order
+                                self.order = self.buy()
 
         else:
-            if self.dataclose[0] > self.sma[0]:
-                if self.vortex.vi_plus[0] >= 1.12: # or self.vortex.vi_minus[0] < .55:
+            # if round(self.rsi[0]) == 60:
+            if self.data.close >= self.boll.lines.top:
+                # if round(self.rsi[0]) >= 70:
+                # if round(self.vortex_dif[0], 2) < -0.31:
+
+            # if self.vortex_dif[0] < - 0.7 and self.rsi[0] > 60:
+            # if self.dataclose[0] > self.sma[0]:
+                # if self.vortex.vi_plus[0] >= 1.12: # or self.vortex.vi_minus[0] < .55:
                 #if self.dataclose[0] > self.sma[0]:
                     #if self.rsi[0] > 76:
                         # SELL, SELL, SELL!!! (with all possible default parameters)

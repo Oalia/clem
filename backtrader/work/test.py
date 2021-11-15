@@ -30,7 +30,7 @@ if __name__ == '__main__':
     datapath = os.path.join(modpath, '../../datas/data_file.csv')
 
     # Create a Data Feed
-    data = bt.feeds.PandasData(dataname=yf.download('GOLD', '2017-01-01', '2020-10-01'))
+    data = bt.feeds.PandasData(dataname=yf.download('SBSW', '2021-10-01', '2021-11-01', interval='15m'))
     # dataname=yf.download('TSLA', '2018-01-01', '2019-01-01')
     # dataname.to_csv("feeder.csv")
 
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     cerebro.broker.setcash(1000.0)
 
     # Add a FixedSize sizer according to the stake
-    cerebro.addsizer(bt.sizers.FixedSize, stake=10)
+    cerebro.addsizer(bt.sizers.FixedSize, stake=30)
 
     # Set the commission
     cerebro.broker.setcommission(commission=0.0)

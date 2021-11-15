@@ -135,8 +135,9 @@ class TestStrategy(bt.Strategy):
             # print(self.vi_plus[0])
             # print(self.vortex_dif[0])
             # if round(self.rsi[0]) == 27 and self.vortex.vi_minus[0]:
-            if round(self.vortex_dif[0], 3) < 0.001 : 
-                if self.data.close < self.boll.lines.bot:
+            if round(self.vortex.vi_minus[0], 1) < 0.48:
+            # if round(self.vortex_dif[0], 3) < 0.001 : 
+                # if self.data.close < self.boll.lines.bot:
 
                 # if round(self.vortex_dif[4], 2) > 0.1 :
                 #if self.vortex.vi_minus[0] - self.vortex.vi_plus[0] < 0.009 : # and self.vortex.l.vi_minus[10] > 1:

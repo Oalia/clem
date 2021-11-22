@@ -44,7 +44,7 @@ class MarketStructure(bt.Strategy):
         self.buycomm = None
 
         # zigzags
-        self.nullzig = ZigZag(self.data)\
+        self.nullzig = ZigZag(self.data)
         # support and resistance
         self.supres = SupportResistance(self.nullzig)
 
@@ -86,6 +86,8 @@ class MarketStructure(bt.Strategy):
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
             self.log('Order Canceled/Margin/Rejected')
 
+        # write down: no pending order
+        self.order = None
 
     def notify_trade(self, trade):
         if not trade.isclosed:
@@ -98,29 +100,33 @@ class MarketStructure(bt.Strategy):
         self.log('Close, %.2f' % self.dataclose[0])
         
         # Check if an order is pending ... if yes, we cannot send a 2nd one
-        # if self.order:
-        #     return
-
-        # zigzags
-        # if self.nan_zig.zigzag[0] > 0:
-            # """ """
-        # print(len(self.nullzig))
-        # try: 
-        #     # print(len(self.zigs))
-        # except:
-        #     """"""
-
-
-        # print(self .nan_zig.zigzag[0] , self.nan_zig.value[0])
-            
+        if self.order:
+            return            
 
         # Check if we are in the market
-        # if not self.position:
-            # self.order = self.buy()
+        if not self.position:
+            
+            # do nothing if the trend is already in motion
+            if not (self.nullzig.l.zigzag[0] >= 0) :
+                ""
+            else:
+                # else when we note a change in trend, then work
+                self.log('BUY CREATE, %.2f' % self.dataclose[0])
 
-        # else:
-         
-        # self.order = self.sell()
+                # keep track of the created order to avoid a 2nd order
+                self.order = self.buy()
+
+        else:
+            
+            # do nothing if the trend is already in motion
+            if not (self.nullzig.l.zigzag[0] >= 0) :
+                ""
+            else:
+                # else when we note a change in trend, then work
+                self.log('SELL CREATE, %.2f' % self.dataclose[0])
+
+                # keep track of the created order to avoid a 2nd order
+                self.order = self.sell()
 
     def stop(self):
         self.log('(MA Period %2d) Ending Value %.2f' %

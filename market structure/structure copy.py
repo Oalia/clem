@@ -50,6 +50,8 @@ class MarketStructure(bt.Strategy):
             print('%s, %s' % (dt.isoformat(), txt))
 
     def __init__(self):
+
+        
         # Keep a reference to the "close" line in the data[0] dataseries
         self.dataclose = self.datas[0].close
   
@@ -63,9 +65,12 @@ class MarketStructure(bt.Strategy):
         # support and resistance
         self.supres = SupportResistance(self.nullzig)
 
+        # 3 bollinger bands
+        self.boll = bt.indicators.BollingerBands(period=self.p.bollperiod, devfactor=self.p.devfactor)
+
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
-            # print("order submitted / Accepted")
+            print("order submitted / Accepted")
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
             return
 
@@ -79,7 +84,7 @@ class MarketStructure(bt.Strategy):
 
                 self.buyprice = order.executed.price
                 self.buycomm = order.executed.comm
-                # print(self.buyprice, "buy order complete")
+                print(self.buyprice, "buy order complete")
 
             elif order.issell():  # Sell
                 self.log('SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
@@ -88,7 +93,7 @@ class MarketStructure(bt.Strategy):
                           order.executed.comm))
 
             self.bar_executed = len(self)
-            # print(order.executed.price, "sell order complete")
+            print(order.executed.price, "sell order complete")
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
             self.log('Order Canceled/Margin/Rejected')
@@ -96,7 +101,6 @@ class MarketStructure(bt.Strategy):
         # write down: no pending order
         if order.status in [order.Completed, order.Cancelled, order.Rejected]:
             self.order = None
-            ""
 
 
     def notify_trade(self, trade):
@@ -104,13 +108,11 @@ class MarketStructure(bt.Strategy):
             return
         self.log('OPERATION PROFIT, GROSS %.2f, NET %.2f' %
                  (trade.pnl, trade.pnlcomm))
-        # print('OPERATION PROFIT, GROSS %.2f, NET %.2f' %
-        #          (trade.pnl, trade.pnlcomm))
 
     def next(self):
         # Simply log the closing price of the series from the reference
         self.log('Close, %.2f' % self.dataclose[0])
-        # self.logdata()
+        self.logdata()
         
         # Check if an order is pending ... if yes, we cannot send a 2nd one
         if self.order:
@@ -126,15 +128,13 @@ class MarketStructure(bt.Strategy):
             if not (self.nullzig.l.zigzag[0] >= 0) :
                 ""
             else:
-                # print(self.nullzig.l.zigzag[0], " BUY")
-                # if self.nullzig.l.value[0] != -1:
+                # if self.dataclose[0] < self.boll.bot[0]:
                     # else when we note a change in trend, then work
-                    
-                self.log('BUY CREATE, %.2f' % self.dataclose[0])
+                    self.log('BUY CREATE, %.2f' % self.dataclose[0])
 
                     # keep track of the created order to avoid a 2nd order
                     # transmit = False, means the order will be transmitted from a child order
-                self.order = self.sell()
+                    self.order = self.sell()
 
                     # self.buy_order = self.buy(transmit=False)
 
@@ -154,8 +154,7 @@ class MarketStructure(bt.Strategy):
             if not (self.nullzig.l.zigzag[0] >= 0) :
                 ""
             else:
-                # if self.nullzig.l.zigzag[0] == -1:
-                    # print(self.nullzig.l.zigzag[0], " SELL")
+                # if self.nullzig.l.zigzag[0] == 1:
                     # else when we note a change in trend, then work
                     self.log('SELL CREATE, %.2f' % self.dataclose[0])
 

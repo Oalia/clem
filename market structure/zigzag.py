@@ -34,7 +34,7 @@ class ZigZag(bt.ind.PeriodN):
 
     params = (
         ('period', 2),
-        ('retrace', 0.05), # in percent
+        ('retrace', 5), # in percent default  is 0.05
         ('minbars', 2), # number of bars to skip after the trend change
     )
 
@@ -98,11 +98,11 @@ class ZigZag(bt.ind.PeriodN):
                     self.l.value[-self.last_pivot_ago] = 1 # resistance
                     self.last_pivot_t = curr_idx
 
-                    # list_data = [self.l.last_high[0],  1]
-                    # with open('zigzags.csv', 'a', newline='') as f_object:  
-                    #     writer_object = writer(f_object)
-                    #     writer_object.writerow(list_data)  
-                    #     f_object.close()
+                    list_data = [self.l.last_high[0],  1]
+                    with open('zigzags.csv', 'a', newline='') as f_object:  
+                        writer_object = writer(f_object)
+                        writer_object.writerow(list_data)  
+                        f_object.close()
 
 
                 elif self.count_bars < self.minbars and self.data.close[0] < self.l.last_low[0]:
@@ -119,11 +119,11 @@ class ZigZag(bt.ind.PeriodN):
                     # # df  = pd.concat([list_data, df])
                     # # df.to_csv('zigzags.csv', mode='w')
 
-                    # list_data = [self.l.last_high[0],  1]
-                    # with open('zigzags.csv', 'a', newline='') as f_object:  
-                    #     writer_object = writer(f_object)
-                    #     writer_object.writerow(list_data)  
-                    #     f_object.close()
+                    list_data = [self.l.last_high[0],  1]
+                    with open('zigzags.csv', 'a', newline='') as f_object:  
+                        writer_object = writer(f_object)
+                        writer_object.writerow(list_data)  
+                        f_object.close()
 
         # Down trend
         elif self.l.trend[-1] == -1:
@@ -140,11 +140,11 @@ class ZigZag(bt.ind.PeriodN):
                     self.l.value[-self.last_pivot_ago] = -1 # new support
                     self.last_pivot_t = curr_idx
 
-                    # list_data = [self.l.last_low[0],  -1]
-                    # with open('zigzags.csv', 'a', newline='') as f_object:  
-                    #     writer_object = writer(f_object)
-                    #     writer_object.writerow(list_data)  
-                    #     f_object.close()
+                    list_data = [self.l.last_low[0],  -1]
+                    with open('zigzags.csv', 'a', newline='') as f_object:  
+                        writer_object = writer(f_object)
+                        writer_object.writerow(list_data)  
+                        f_object.close()
 
 
                 elif self.count_bars < self.minbars and self.data.close[0] > self.l.last_high[-1]:
@@ -155,11 +155,11 @@ class ZigZag(bt.ind.PeriodN):
                     self.l.value[-self.last_pivot_ago] = -1 # new support
                     self.last_pivot_t = curr_idx
 
-                    # list_data = [self.l.last_low[0],  -1]
-                    # with open('zigzags.csv', 'a', newline='') as f_object:  
-                    #     writer_object = writer(f_object)
-                    #     writer_object.writerow(list_data)  
-                    #     f_object.close()
+                    list_data = [self.l.last_low[0],  -1]
+                    with open('zigzags.csv', 'a', newline='') as f_object:  
+                        writer_object = writer(f_object)
+                        writer_object.writerow(list_data)  
+                        f_object.close()
 
         # Decrease minbars counter
         self.count_bars -= 1

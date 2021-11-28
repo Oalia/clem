@@ -34,7 +34,11 @@ class ZigZag(bt.ind.PeriodN):
 
     params = (
         ('period', 2),
-        ('retrace', 5), # in percent default  is 0.05
+        ('retrace', .07), #
+        # in percent default  is 0.05 : 
+        # 2.5 for bitcoin, 20 for AMC
+        # 3 for SAN 100% 
+        # 2.2 for BNBUSD trades more but 2.4,2.5 trades less but will they make e^x more long term?
         ('minbars', 2), # number of bars to skip after the trend change
     )
 

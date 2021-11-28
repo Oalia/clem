@@ -3,8 +3,14 @@ import backtrader.indicators as btind
 import backtrader.feeds as btfeeds
 from zigzag import *
 from supres import SupportResistance
+import requests
+import datetime as dt
 
 
+TELEGRAM = {
+  "channel": "-1001683168351", 
+  "bot": "2124069658:AAG9Q_NXP3PajsxDD58yn4tnRrK3rFWs8-U"
+}
 
 # Create a Stratey
 class MarketStructure(bt.Strategy):
@@ -125,29 +131,13 @@ class MarketStructure(bt.Strategy):
             # do nothing if the trend is already in motion
             if not (self.nullzig.l.zigzag[0] >= 0) :
                 ""
-            else:
-                # print(self.nullzig.l.zigzag[0], " BUY")
-                # if self.nullzig.l.value[0] != -1:
-                    # else when we note a change in trend, then work
-                    
+            else:   
                 self.log('BUY CREATE, %.2f' % self.dataclose[0])
 
                     # keep track of the created order to avoid a 2nd order
                     # transmit = False, means the order will be transmitted from a child order
-                self.order = self.sell()
-
-                    # self.buy_order = self.buy(transmit=False)
-
-                    # #Setting parent=buy_order ... sends both together
-                    # if not self.p.trail:
-                    #     stop_price = self.data.close[0] * (1.0 - self.p.stop_loss)
-                    #     self.sell(exectype=bt.Order.Stop, price=stop_price,
-                    #             parent=self.buy_order)
-                    # else:
-                    #     self.sell(exectype=bt.Order.StopTrail,
-                    #           trailamount=self.p.trail,
-                    #           parent=self.buy_order)
-
+                self.order = self.buy()
+                # self.send_telegram_message("{} {} sell".format(dt.datetime.utcnow(), self.dataclose[0]))
         else:
 
             # do nothing if the trend is already in motion
@@ -160,7 +150,8 @@ class MarketStructure(bt.Strategy):
                     self.log('SELL CREATE, %.2f' % self.dataclose[0])
 
                     # keep track of the created order to avoid a 2nd order
-                    self.sell_order = self.buy()
+                    self.sell_order = self.sell()
+                    # self.send_telegram_message("{} {} buy".format(dt.datetime.utcnow(), self.dataclose[0]))
 
     def stop(self):
         self.log('(MA Period %2d) Ending Value %.2f' %
@@ -174,5 +165,21 @@ class MarketStructure(bt.Strategy):
         df = pd.DataFrame(resistance)
         df = df.dropna()
         df.to_csv("resistances.csv")
+
+    def send_telegram_message(self, message):
+        # if ENV != "production":
+        #     return
+
+        base_url = "https://api.telegram.org/bot%s" % TELEGRAM.get("bot")
+        requests.get("%s/sendMessage" % base_url, params={
+            'chat_id': TELEGRAM.get("channel"),
+            'text': message
+        })
     
-    
+    """
+     API Key: h51BzWIJPFEWsiwrtSEZrPbd9hg1RBLYA4Obt4648xvk6Ui9L13S75e8oPExxKcX
+
+Secret Key: 28612dc1YDdd4kDWljRSRZh3Zg63nI4AvfoViW2Xrdn5u777jKefzKBNSykZS8ce
+    ""
+    """
+   

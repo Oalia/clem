@@ -16,6 +16,11 @@ from extensions.analyzers import BasicTradeStats
 
 
 def main():
+
+
+
+
+    
     # Create a cerebro entity
     cerebro = bt.Cerebro()
 
@@ -25,11 +30,12 @@ def main():
         # modpath = os.path.dirname(os.path.abspath(sys.argv[0]))
         # datapath = os.path.join(modpath, '../../datas/data_file.csv')
 
-    data = bt.feeds.PandasData(dataname=yf.download('BNB-USD', '2020-12-11', dt.datetime.utcnow(), interval="1h"))
+    data = bt.feeds.PandasData(dataname=yf.download('BNB-USD', '2021-10-29', dt.datetime.utcnow(), interval="1h"))
     # Add the Data Feed to Cerebro
     cerebro.adddata(data)
 
-    cerebro.broker.setcash(10.0)
+
+    cerebro.broker.setcash(1000.0)
     cerebro.addsizer(bt.sizers.PercentSizer, percents = 90)
     cerebro.broker.setcommission(commission=0.002)
     
@@ -67,7 +73,7 @@ def main():
     print('Sharpe Ratio: ', thestrat.analyzers.mysharpe.get_analysis() )
     # print('Annual Ratio: ', thestrat.analyzers.annual.get_analysis() )
     # print('Drawdown Ratio: ', thestrat.analyzers.drawdown.get_analysis() )
-    cerebro.plot()
+    # cerebro.plot()
 
 
 if __name__== "__main__":

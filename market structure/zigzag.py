@@ -34,11 +34,24 @@ class ZigZag(bt.ind.PeriodN):
 
     params = (
         ('period', 2),
-        ('retrace', .07), #
+        ('retrace', 2.238 ), #8.2387), 
+
         # in percent default  is 0.05 : 
         # 2.5 for bitcoin, 20 for AMC
         # 3 for SAN 100% 
         # 2.2 for BNBUSD trades more but 2.4,2.5 trades less but will they make e^x more long term?
+        # LAGGGINGGGGGG this shit is lagging
+        # but we can do this: when we identify a high, place an order at 0.92109500805 of the high.
+        # or wait, could we keep on modifying our order. If we are in an uptrend that has exceeded 
+        # some amount and we have set our profit, should we keep modifying our order to make up for this 
+        # lagging mess.
+        # keep modifying 
+        # given this uptrend in amount, what was the learned retracement?
+        # put our buy at retracement. If it works, kudos to the knowledge.
+        # we have seen .92 retracement from highs at BNBUSD, we might trade with it. And then 
+        # watch out for zigzag confirmation.
+        # LAGGGgGgGGggggGGGGggg lagoster.
+
         ('minbars', 2), # number of bars to skip after the trend change
     )
 
@@ -73,7 +86,10 @@ class ZigZag(bt.ind.PeriodN):
         self.l.last_low[0] = self.l.last_low[-1]
         self.l.zigzag[0] = float('NaN')
 
-        t = False # keeps track of if we have a new data point to use to update our zigzag.csv
+        # t = False # keeps track of if we have a new data point to use to update our zigzag.csv
+
+        t = self.data.num2date()
+
 
         # Search for trend
         if self.l.trend[-1] == 0:
@@ -102,7 +118,7 @@ class ZigZag(bt.ind.PeriodN):
                     self.l.value[-self.last_pivot_ago] = 1 # resistance
                     self.last_pivot_t = curr_idx
 
-                    list_data = [self.l.last_high[0],  1]
+                    list_data = [self.l.last_high[0],  1, t]
                     with open('zigzags.csv', 'a', newline='') as f_object:  
                         writer_object = writer(f_object)
                         writer_object.writerow(list_data)  
@@ -123,7 +139,7 @@ class ZigZag(bt.ind.PeriodN):
                     # # df  = pd.concat([list_data, df])
                     # # df.to_csv('zigzags.csv', mode='w')
 
-                    list_data = [self.l.last_high[0],  1]
+                    list_data = [self.l.last_high[0],  1, t]
                     with open('zigzags.csv', 'a', newline='') as f_object:  
                         writer_object = writer(f_object)
                         writer_object.writerow(list_data)  
@@ -144,7 +160,7 @@ class ZigZag(bt.ind.PeriodN):
                     self.l.value[-self.last_pivot_ago] = -1 # new support
                     self.last_pivot_t = curr_idx
 
-                    list_data = [self.l.last_low[0],  -1]
+                    list_data = [self.l.last_low[0],  -1, t]
                     with open('zigzags.csv', 'a', newline='') as f_object:  
                         writer_object = writer(f_object)
                         writer_object.writerow(list_data)  
@@ -159,7 +175,7 @@ class ZigZag(bt.ind.PeriodN):
                     self.l.value[-self.last_pivot_ago] = -1 # new support
                     self.last_pivot_t = curr_idx
 
-                    list_data = [self.l.last_low[0],  -1]
+                    list_data = [self.l.last_low[0],  -1, t]
                     with open('zigzags.csv', 'a', newline='') as f_object:  
                         writer_object = writer(f_object)
                         writer_object.writerow(list_data)  

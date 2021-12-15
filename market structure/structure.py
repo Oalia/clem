@@ -11,6 +11,11 @@ TELEGRAM = {
   "channel": "-1001683168351", 
   "bot": "2124069658:AAG9Q_NXP3PajsxDD58yn4tnRrK3rFWs8-U"
 }
+# TELEGRAM = {
+#   "channel": "-1759912824", 
+#   "bot": "5034003189:AAEVr7ycuuWhGj69B8lMZJ_uRJMWtWYUFXw"
+# }
+
 
 # Create a Stratey
 class MarketStructure(bt.Strategy):
@@ -82,6 +87,9 @@ class MarketStructure(bt.Strategy):
                     (order.executed.price,
                      order.executed.value,
                      order.executed.comm))
+                self.send_telegram_message("BUY EXECUTED, Price: {}, Cost: {}, Comm {}".format(order.executed.price,
+                     order.executed.value,
+                     order.executed.comm))
 
                 self.buyprice = order.executed.price
                 self.buycomm = order.executed.comm
@@ -92,12 +100,16 @@ class MarketStructure(bt.Strategy):
                          (order.executed.price,
                           order.executed.value,
                           order.executed.comm))
+                self.send_telegram_message("SELL EXECUTED, Price: {}, Cost: {}, Comm {}".format(order.executed.price,
+                     order.executed.value,
+                     order.executed.comm))
 
             self.bar_executed = len(self)
             # print(order.executed.price, "sell order complete")
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
             self.log('Order Canceled/Margin/Rejected')
+            self.send_telegram_message("Order Canceled/Margin/Rejected")
 
         # write down: no pending order
         if order.status in [order.Completed, order.Cancelled, order.Rejected]:
@@ -110,6 +122,7 @@ class MarketStructure(bt.Strategy):
             return
         self.log('OPERATION PROFIT, GROSS %.2f, NET %.2f' %
                  (trade.pnl, trade.pnlcomm))
+        self.send_telegram_message("OPERATION PROFIT, GROSS {}, NET {}".format(trade.pnl, trade.pnlcomm))
         # print('OPERATION PROFIT, GROSS %.2f, NET %.2f' %
         #          (trade.pnl, trade.pnlcomm))
 
@@ -137,7 +150,7 @@ class MarketStructure(bt.Strategy):
                     # keep track of the created order to avoid a 2nd order
                     # transmit = False, means the order will be transmitted from a child order
                 self.order = self.buy()
-                # self.send_telegram_message("{} {} sell".format(dt.datetime.utcnow(), self.dataclose[0]))
+                self.send_telegram_message("BUY CREATE {} {}".format(self.data.datetime.datetime(0).isoformat(), self.dataclose[0]))
         else:
 
             # do nothing if the trend is already in motion
@@ -151,7 +164,7 @@ class MarketStructure(bt.Strategy):
 
                     # keep track of the created order to avoid a 2nd order
                     self.sell_order = self.sell()
-                    # self.send_telegram_message("{} {} buy".format(dt.datetime.utcnow(), self.dataclose[0]))
+                    self.send_telegram_message("SELL CREATE {} {}".format(self.data.datetime.datetime(0).isoformat(), self.dataclose[0]))
 
     def stop(self):
         self.log('(MA Period %2d) Ending Value %.2f' %
